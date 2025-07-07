@@ -61,7 +61,7 @@ def index():
                     scale=upscale,
                     model_path='gfpgan/experiments/pretrained_models/RealESRGAN_x4plus.pth',
                     model=model,
-                    tile=128,
+                    tile=0,
                     tile_pad=10,
                     pre_pad=0,
                     half=False,

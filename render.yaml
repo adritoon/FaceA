@@ -1,9 +1,7 @@
 services:
   - type: web
-    name: mejorador-flask
-    env: python
-    buildCommand: pip install -r requirements.txt && python gfpgan_download.py
-    startCommand: python app.py
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.10
+    name: facea
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true

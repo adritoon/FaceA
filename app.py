@@ -61,7 +61,7 @@ def index():
                     scale=upscale,
                     model_path='gfpgan/experiments/pretrained_models/RealESRGAN_x4plus.pth',
                     model=model,
-                    tile=0,
+                    tile=128,
                     tile_pad=10,
                     pre_pad=0,
                     half=False,
@@ -94,5 +94,5 @@ def index():
     return render_template("index.html", output_image=output_image, original_image=original_image)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)

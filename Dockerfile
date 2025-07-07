@@ -1,21 +1,17 @@
-# Usa Python 3.10
 FROM python:3.10-slim
 
-# Establece el directorio de trabajo
 WORKDIR /app
 
-# Copia archivos
+# Instala dependencias del sistema, incluyendo libGL
+RUN apt-get update && apt-get install -y libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
+
 COPY . /app
 
-# Instala dependencias
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Descarga los modelos
 RUN python gfpgan_download.py
 
-# Expone el puerto
 EXPOSE 5000
 
-# Comando para iniciar la app
 CMD ["python", "app.py"]

@@ -139,12 +139,21 @@
       }
     }
   </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VCC08QD46V"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-VCC08QD46V');
+  </script>
 </head>
 <body>
 
   <button class="theme-toggle" onclick="toggleTheme()">🌗 Modo oscuro</button>
 
-  <h1>Mejora Facial con GFPGAN</h1>
+  <h1>Mejora Facial con IA</h1>
 
   <div class="container">
     {% if output_image and original_image %}
@@ -171,13 +180,17 @@
           </select>
         </div>
 
-        <button type="submit">Mejorar imagen</button>
+        <button type="submit" onclick="gtag('event', 'click', { 'event_category': 'Botón', 'event_label': 'Mejorar imagen' });">
+          Mejorar imagen
+        </button>
       </form>
 
       {% if output_image and original_image %}
       <div class="controls">
         <button onclick="toggleImage()">Alternar Original / Mejorada</button>
-        <a href="{{ output_image }}" download>⬇️ Descargar imagen mejorada</a>
+        <a href="{{ output_image }}" download onclick="gtag('event', 'click', { 'event_category': 'Botón', 'event_label': 'Descargar imagen' });">
+          ⬇️ Descargar imagen mejorada
+        </a>
       </div>
       {% endif %}
     </div>

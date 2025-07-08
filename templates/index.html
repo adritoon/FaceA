@@ -139,18 +139,50 @@
       }
     }
     #footer {
-      background-color: #f5f5f5;
+      background-color: #f0f0f0;
       color: #333;
+      padding: 20px;
+    }
+
+    #footer a {
+      color: #007bff;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+
+    #footer a:hover {
+      text-decoration: underline;
     }
 
     body.dark #footer {
-      background-color: #1e1e1e;
+      background-color: #121212;
       color: #ccc;
     }
 
     body.dark #footer a {
       color: #9fc3ff;
     }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body {
+      flex: 1;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
 
   </style>
   <!-- Google tag (gtag.js) -->
@@ -164,72 +196,74 @@
   </script>
 </head>
 <body>
+  <main>
+    <button class="theme-toggle" onclick="toggleTheme()">🌗 Modo oscuro</button>
 
-  <button class="theme-toggle" onclick="toggleTheme()">🌗 Modo oscuro</button>
+    <h1>Mejora Facial con IA</h1>
 
-  <h1>Mejora Facial con IA</h1>
-
-  <div class="container">
-    {% if output_image and original_image %}
-    <div class="image-panel">
-      <img id="resultImg" src="{{ output_image }}">
-    </div>
-    {% endif %}
-
-    <div class="form-panel">
-      <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="image" accept="image/*" required>
-
-        <label>
-          <input type="checkbox" name="mejorar_fondo" value="1">
-          Mejorar también el fondo (más lento)
-        </label>
-
-        <div class="select-row">
-          <label for="escala">Escala de mejora:</label>
-          <select name="escala" id="escala">
-            <option value="1">1x (sin ampliar)</option>
-            <option value="2" selected>2x (recomendado)</option>
-            <option value="4">4x (máxima calidad)</option>
-          </select>
-        </div>
-
-        <button type="submit" onclick="gtag('event', 'click', { 'event_category': 'Botón', 'event_label': 'Mejorar imagen' });">
-          Mejorar imagen
-        </button>
-      </form>
-
+    <div class="container">
       {% if output_image and original_image %}
-      <div class="controls">
-        <button onclick="toggleImage()">Alternar Original / Mejorada</button>
-        <a href="{{ output_image }}" download onclick="gtag('event', 'click', { 'event_category': 'Botón', 'event_label': 'Descargar imagen' });">
-          ⬇️ Descargar imagen mejorada
-        </a>
+      <div class="image-panel">
+        <img id="resultImg" src="{{ output_image }}">
       </div>
       {% endif %}
+
+      <div class="form-panel">
+        <form method="POST" enctype="multipart/form-data">
+          <input type="file" name="image" accept="image/*" required>
+
+          <label>
+            <input type="checkbox" name="mejorar_fondo" value="1">
+            Mejorar también el fondo (más lento)
+          </label>
+
+          <div class="select-row">
+            <label for="escala">Escala de mejora:</label>
+            <select name="escala" id="escala">
+              <option value="1">1x (sin ampliar)</option>
+              <option value="2" selected>2x (recomendado)</option>
+              <option value="4">4x (máxima calidad)</option>
+            </select>
+          </div>
+
+          <button type="submit" onclick="gtag('event', 'click', { 'event_category': 'Botón', 'event_label': 'Mejorar imagen' });">
+            Mejorar imagen
+          </button>
+        </form>
+
+        {% if output_image and original_image %}
+        <div class="controls">
+          <button onclick="toggleImage()">Alternar Original / Mejorada</button>
+          <a href="{{ output_image }}" download onclick="gtag('event', 'click', { 'event_category': 'Botón', 'event_label': 'Descargar imagen' });">
+            ⬇️ Descargar imagen mejorada
+          </a>
+        </div>
+        {% endif %}
+      </div>
     </div>
-  </div>
 
-  <script>
-    let showingOriginal = false;
-    function toggleImage() {
-      const img = document.getElementById("resultImg");
-      img.src = showingOriginal ? "{{ output_image }}" : "{{ original_image }}";
-      showingOriginal = !showingOriginal;
-    }
-
-    function toggleTheme() {
-      const body = document.body;
-      const isDark = body.classList.toggle("dark");
-      localStorage.setItem("darkMode", isDark ? "1" : "0");
-    }
-
-    window.onload = () => {
-      if (localStorage.getItem("darkMode") === "1") {
-        document.body.classList.add("dark");
+    <script>
+      let showingOriginal = false;
+      function toggleImage() {
+        const img = document.getElementById("resultImg");
+        img.src = showingOriginal ? "{{ output_image }}" : "{{ original_image }}";
+        showingOriginal = !showingOriginal;
       }
-    };
-  </script>
+
+      function toggleTheme() {
+        const body = document.body;
+        const isDark = body.classList.toggle("dark");
+        localStorage.setItem("darkMode", isDark ? "1" : "0");
+      }
+
+      window.onload = () => {
+        if (localStorage.getItem("darkMode") === "1") {
+          document.body.classList.add("dark");
+        }
+      };
+    </script>
+  </main>
+
   <footer style="text-align:center; padding: 20px; font-size: 14px; margin-top: 40px;" id="footer">
     <a href="/acerca" style="margin: 0 10px;">Acerca de</a> |
     <a href="/como-usar" style="margin: 0 10px;">Cómo usar</a> |

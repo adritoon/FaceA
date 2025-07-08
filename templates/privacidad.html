@@ -2,12 +2,103 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Política de privacidad</title>
+  <title>Política de Privacidad</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      margin: 0;
+      background-color: #fff;
+      color: #000;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.dark {
+      background-color: #121212;
+      color: #eee;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    #footer {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: #f0f0f0;
+      text-align: center;
+    }
+
+    #footer a {
+      color: #007bff;
+      margin: 0 10px;
+      text-decoration: none;
+    }
+
+    #footer a:hover {
+      text-decoration: underline;
+    }
+
+    body.dark #footer {
+      background-color: #121212;
+      color: #ccc;
+    }
+
+    body.dark #footer a {
+      color: #9fc3ff;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 14px;
+      padding: 6px 10px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    body.dark .theme-toggle {
+      background: #eee;
+      color: black;
+    }
+  </style>
 </head>
-<body style="font-family: Arial; padding: 30px;">
-  <h1>Política de privacidad</h1>
-  <p>No almacenamos ni compartimos tus imágenes. Todas las mejoras se realizan de forma temporal y segura.</p>
-  <p>Las estadísticas son recopiladas de forma anónima mediante Google Analytics para mejorar el servicio.</p>
-  <a href="/">← Volver al inicio</a>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">🌗 Modo oscuro</button>
+
+  <div class="container">
+    <h1>Política de Privacidad</h1>
+    <p>GlowFace no almacena imágenes ni datos personales. Las imágenes se procesan temporalmente y se eliminan automáticamente después de un corto periodo. No se comparte ninguna información con terceros.</p>
+    <p>El sitio utiliza Google Analytics para estadísticas anónimas de uso. Puedes bloquearlo desde tu navegador si lo prefieres.</p>
+  </div>
+
+  <div id="footer">
+    <a href="/">Inicio</a>
+    <a href="/acerca">Acerca de</a>
+    <a href="/como-usar">Cómo usar</a>
+    <a href="/privacidad">Política de privacidad</a>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.classList.toggle("dark");
+      localStorage.setItem("darkMode", isDark ? "1" : "0");
+    }
+    window.onload = () => {
+      if (localStorage.getItem("darkMode") === "1") {
+        document.body.classList.add("dark");
+      }
+    };
+  </script>
 </body>
 </html>

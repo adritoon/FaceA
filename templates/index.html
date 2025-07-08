@@ -138,6 +138,20 @@
         max-height: 60vh;
       }
     }
+    #footer {
+      background-color: #f5f5f5;
+      color: #333;
+    }
+
+    body.dark #footer {
+      background-color: #1e1e1e;
+      color: #ccc;
+    }
+
+    body.dark #footer a {
+      color: #9fc3ff;
+    }
+
   </style>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-VCC08QD46V"></script>
@@ -216,6 +230,12 @@
       }
     };
   </script>
+  <footer style="text-align:center; padding: 20px; font-size: 14px; margin-top: 40px;" id="footer">
+    <a href="/acerca" style="margin: 0 10px;">Acerca de</a> |
+    <a href="/como-usar" style="margin: 0 10px;">Cómo usar</a> |
+    <a href="/privacidad" style="margin: 0 10px;">Política de privacidad</a>
+  </footer>
+
 
 </body>
 </html>

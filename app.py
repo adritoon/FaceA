@@ -1,7 +1,7 @@
 import os
 import cv2
 from datetime import datetime
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 from PIL import Image
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from gfpgan import GFPGANer
@@ -14,8 +14,12 @@ app.config["OUTPUT_FOLDER"] = "static"
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(app.config["OUTPUT_FOLDER"], exist_ok=True)
 
-@app.route("/", methods=["GET", "POST"])
-def index():
+@app.route("/")
+def home_redirect():
+    return redirect("/en")
+
+@app.route("/<lang>", methods=["GET", "POST"])
+def index(lang):
     output_image = None
     original_image = None
 
@@ -91,19 +95,19 @@ def index():
             resized_original = img.resize(result_pil.size)
             resized_original.save(original_copy_path)
 
-    return render_template("index.html", output_image=output_image, original_image=original_image)
+    return render_template(f"{lang}/index.html", output_image=output_image, original_image=original_image)
 
-@app.route("/about")
-def about():
-    return render_template("about.html")
+@app.route("/<lang>/acerca")
+def acerca(lang):
+    return render_template(f"{lang}/acerca.html")
 
-@app.route("/how-to-use")
-def how_to_use():
-    return render_template("how-to-use.html")
+@app.route("/<lang>/como-usar")
+def como_usar(lang):
+    return render_template(f"{lang}/como_usar.html")
 
-@app.route("/privacy")
-def privacy():
-    return render_template("privacy.html")
+@app.route("/<lang>/privacidad")
+def privacidad(lang):
+    return render_template(f"{lang}/privacidad.html")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))

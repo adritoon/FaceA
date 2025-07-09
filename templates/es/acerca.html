@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Acerca de - GlowFace</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      margin: 0;
+      background-color: #fff;
+      color: #000;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark { background-color: #121212; color: #eee; }
+    .container { max-width: 800px; margin: auto; }
+    h1 { text-align: center; }
+    #footer {
+      margin-top: 40px; padding: 20px;
+      background-color: #f0f0f0; text-align: center;
+    }
+    #footer a {
+      color: #007bff; margin: 0 10px;
+      text-decoration: none;
+    }
+    #footer a:hover { text-decoration: underline; }
+    body.dark #footer { background-color: #121212; color: #ccc; }
+    body.dark #footer a { color: #9fc3ff; }
+    .theme-toggle {
+      position: absolute; top: 10px; right: 10px;
+      font-size: 14px; padding: 6px 10px;
+      background: #444; color: white; border: none;
+      border-radius: 4px; cursor: pointer;
+    }
+    body.dark .theme-toggle { background: #eee; color: black; }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">🌗 Modo oscuro</button>
+
+  <div class="container">
+    <h1>Acerca de GlowFace</h1>
+    <p><strong>GlowFace</strong> es una aplicación web impulsada por inteligencia artificial que mejora los rostros en las fotos utilizando tecnología avanzada de restauración y escalado.</p>
+    <p>Ya sea para restaurar retratos antiguos, corregir selfies borrosos o mejorar imágenes de baja calidad, GlowFace mejora los detalles, la nitidez y resalta la belleza natural — al instante y sin esfuerzo.</p>
+    <p>La plataforma es rápida, segura y respetuosa con tu privacidad. No necesitas registrarte, y tus imágenes nunca se almacenan ni comparten.</p>
+    <p>GlowFace está diseñada para ser accesible para todos, ofreciendo resultados de calidad profesional con solo un clic.</p>
+  </div>
+
+  <div id="footer">
+    <a href="/">Inicio</a>
+    <a href="/acerca">Acerca de</a>
+    <a href="/como-usar">Cómo usar</a>
+    <a href="/privacidad">Política de privacidad</a>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.classList.toggle("dark");
+      localStorage.setItem("darkMode", isDark ? "1" : "0");
+    }
+    window.onload = () => {
+      if (localStorage.getItem("darkMode") === "1") {
+        document.body.classList.add("dark");
+      }
+    };
+  </script>
+</body>
+</html>

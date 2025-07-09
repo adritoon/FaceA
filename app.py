@@ -93,17 +93,17 @@ def index():
 
     return render_template("index.html", output_image=output_image, original_image=original_image)
 
-@app.route("/acerca")
-def acerca():
-    return render_template("acerca.html")
+@app.route("/about")
+def about():
+    return render_template("about.html")
 
-@app.route("/como-usar")
-def como_usar():
-    return render_template("como_usar.html")
+@app.route("/how-to-use")
+def how_to_use():
+    return render_template("how-to-use.html")
 
-@app.route("/privacidad")
-def privacidad():
-    return render_template("privacidad.html")
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))

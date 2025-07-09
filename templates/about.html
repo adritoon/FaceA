@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>About - GlowFace</title>
+  <style>
+    /* ... mismo estilo que ya tienes ... */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      margin: 0;
+      background-color: #fff;
+      color: #000;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark {
+      background-color: #121212;
+      color: #eee;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 { text-align: center; }
+    #footer {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: #f0f0f0;
+      text-align: center;
+    }
+    #footer a {
+      color: #007bff;
+      margin: 0 10px;
+      text-decoration: none;
+    }
+    #footer a:hover { text-decoration: underline; }
+    body.dark #footer { background-color: #121212; color: #ccc; }
+    body.dark #footer a { color: #9fc3ff; }
+    .theme-toggle {
+      position: absolute; top: 10px; right: 10px;
+      font-size: 14px; padding: 6px 10px;
+      background: #444; color: white; border: none;
+      border-radius: 4px; cursor: pointer;
+    }
+    body.dark .theme-toggle {
+      background: #eee; color: black;
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">🌗 Dark Mode</button>
+
+  <div class="container">
+    <h1>About GlowFace</h1>
+    <p>GlowFace is an AI-powered platform that enhances facial photos using advanced image restoration and upscaling technologies.</p>
+    <p>Whether it's an old blurry photo or a selfie that needs a boost, GlowFace sharpens details, improves clarity, and brings out the natural beauty in your pictures — automatically and in seconds.</p>
+    <p>GlowFace uses AI to achieve professional-quality results with no need for editing skills or software installation.</p>
+    <p>This project is designed for accessibility, speed, and privacy. No accounts. No tracking. Just better faces.</p>
+  </div>
+
+  <div id="footer">
+    <a href="/">Home</a>
+    <a href="/about">About</a>
+    <a href="/how-to-use">How to Use</a>
+    <a href="/privacy">Privacy Policy</a>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.classList.toggle("dark");
+      localStorage.setItem("darkMode", isDark ? "1" : "0");
+    }
+    window.onload = () => {
+      if (localStorage.getItem("darkMode") === "1") {
+        document.body.classList.add("dark");
+      }
+    };
+  </script>
+</body>
+</html>

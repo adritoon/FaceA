@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>How to Use - GlowFace</title>
+  <style>
+    /* mismo estilo que tienes ya */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px; margin: 0;
+      background-color: #fff; color: #000;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark { background-color: #121212; color: #eee; }
+    .container { max-width: 800px; margin: auto; }
+    h1 { text-align: center; }
+    #footer {
+      margin-top: 40px; padding: 20px;
+      background-color: #f0f0f0; text-align: center;
+    }
+    #footer a {
+      color: #007bff; margin: 0 10px;
+      text-decoration: none;
+    }
+    #footer a:hover { text-decoration: underline; }
+    body.dark #footer { background-color: #121212; color: #ccc; }
+    body.dark #footer a { color: #9fc3ff; }
+    .theme-toggle {
+      position: absolute; top: 10px; right: 10px;
+      font-size: 14px; padding: 6px 10px;
+      background: #444; color: white; border: none;
+      border-radius: 4px; cursor: pointer;
+    }
+    body.dark .theme-toggle { background: #eee; color: black; }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">🌗 Dark Mode</button>
+
+  <div class="container">
+    <h1>How to Use GlowFace</h1>
+    <ol>
+      <li>Click on "Choose Image" to upload your photo.</li>
+      <li>Optionally, select "Enhance background" if you want the full image improved.</li>
+      <li>Select the enhancement scale:
+        <ul>
+          <li><strong>1x</strong> – Improve clarity without resizing</li>
+          <li><strong>2x</strong> – Recommended (balances quality & speed)</li>
+          <li><strong>4x</strong> – Highest quality (takes longer)</li>
+        </ul>
+      </li>
+      <li>Click “Enhance Image”. Processing takes a few seconds.</li>
+      <li>Once done, you can compare the result and download the enhanced photo.</li>
+    </ol>
+  </div>
+
+  <div id="footer">
+    <a href="/">Home</a>
+    <a href="/about">About</a>
+    <a href="/how-to-use">How to Use</a>
+    <a href="/privacy">Privacy Policy</a>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.classList.toggle("dark");
+      localStorage.setItem("darkMode", isDark ? "1" : "0");
+    }
+    window.onload = () => {
+      if (localStorage.getItem("darkMode") === "1") {
+        document.body.classList.add("dark");
+      }
+    };
+  </script>
+</body>
+</html>

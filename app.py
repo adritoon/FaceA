@@ -103,7 +103,7 @@ def acerca(lang):
 
 @app.route("/<lang>/como-usar")
 def como_usar(lang):
-    return render_template(f"{lang}/como_usar.html")
+    return render_template(f"{lang}/como-usar.html")
 
 @app.route("/<lang>/privacidad")
 def privacidad(lang):

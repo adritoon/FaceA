@@ -33,3 +33,11 @@ download(
     "https://huggingface.co/camenduru/facexlib/resolve/main/parsing_parsenet.pth",
     "gfpgan/weights/parsing_parsenet.pth"
 )
+
+# RealESRGAN_x4plus_anime_6B
+download(
+    "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth",
+    "gfpgan/experiments/pretrained_models/RealESRGAN_x4plus_anime_6B.pth"
+)
+
+

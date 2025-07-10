@@ -148,7 +148,7 @@ def acerca(lang):
 def como_usar(lang):
     if lang not in ["en", "es"]:
         return "Idioma no válido", 404
-    return render_template(f"{lang}/como_usar.html")
+    return render_template(f"{lang}/como-usar.html")
 
 @app.route("/<lang>/privacidad")
 def privacidad(lang):

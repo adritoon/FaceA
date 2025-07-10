@@ -14,12 +14,8 @@ app.config["OUTPUT_FOLDER"] = "static"
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(app.config["OUTPUT_FOLDER"], exist_ok=True)
 
-@app.route("/")
-def home_redirect():
-    return redirect("/en")
-
-@app.route("/<lang>", methods=["GET", "POST"])
-def index(lang):
+@app.route("/", methods=["GET", "POST"])
+def index():
     output_image = None
     original_image = None
 
@@ -34,7 +30,6 @@ def index(lang):
             upscale = 2
 
         if file:
-            # Nombre único
             base_name = os.path.splitext(file.filename)[0]
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             enhanced_filename = f"{base_name}_enhance_{timestamp}.png"
@@ -47,13 +42,23 @@ def index(lang):
             output_image = f"static/{enhanced_filename}"
             original_image = f"static/{original_filename}"
 
-            # Guardar original
             img = Image.open(file).convert("RGB")
+            original_size = img.size  # (width, height)
+
+            # REDUCCIÓN si alguno de los lados supera 500px
+            max_side = max(original_size)
+            if max_side > 500:
+                aspect_ratio = original_size[0] / original_size[1]
+                if original_size[0] >= original_size[1]:
+                    new_size = (500, int(500 / aspect_ratio))
+                else:
+                    new_size = (int(500 * aspect_ratio), 500)
+                img = img.resize(new_size, Image.LANCZOS)
+
             img.save(input_path)
 
             img_np = cv2.imread(input_path)
 
-            # Upsampler (fondo)
             bg_upsampler = None
             if usar_fondo:
                 model = RRDBNet(
@@ -72,10 +77,9 @@ def index(lang):
                     device='cpu'
                 )
 
-            # Restaurador principal
             restorer = GFPGANer(
                 model_path='gfpgan/experiments/pretrained_models/GFPGANv1.4.pth',
-                upscale=upscale,
+                upscale=1,  # ya hacemos el upscale manualmente luego
                 arch='clean',
                 channel_multiplier=2,
                 bg_upsampler=bg_upsampler,
@@ -86,16 +90,29 @@ def index(lang):
                 img_np, has_aligned=False, only_center_face=False, paste_back=True
             )
 
-            # Guardar resultado
             restored_rgb = cv2.cvtColor(restored_img, cv2.COLOR_BGR2RGB)
             result_pil = Image.fromarray(restored_rgb)
+
+            # ⬆️ Escalar resultado final según tamaño ORIGINAL × upscale elegido
+            final_size = (original_size[0] * upscale, original_size[1] * upscale)
+            result_pil = result_pil.resize(final_size, Image.LANCZOS)
             result_pil.save(output_path)
 
-            # Redimensionar la original al mismo tamaño
-            resized_original = img.resize(result_pil.size)
+            # Redimensionar copia original (con mismo tamaño que salida final)
+            img_original = Image.open(file).convert("RGB")
+            resized_original = img_original.resize(final_size, Image.LANCZOS)
             resized_original.save(original_copy_path)
 
-    return render_template(f"{lang}/index.html", output_image=output_image, original_image=original_image)
+    return render_template("index.html", output_image=output_image, original_image=original_image)
+
+# Rutas multilenguaje
+@app.route("/")
+def home():
+    return redirect("/en")
+
+@app.route("/<lang>")
+def index_lang(lang):
+    return render_template(f"{lang}/index.html")
 
 @app.route("/<lang>/acerca")
 def acerca(lang):
@@ -103,7 +120,7 @@ def acerca(lang):
 
 @app.route("/<lang>/como-usar")
 def como_usar(lang):
-    return render_template(f"{lang}/como-usar.html")
+    return render_template(f"{lang}/como_usar.html")
 
 @app.route("/<lang>/privacidad")
 def privacidad(lang):

@@ -1,7 +1,7 @@
 import os
 import cv2
 from datetime import datetime
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, send_from_directory
 from PIL import Image
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from gfpgan import GFPGANer
@@ -15,6 +15,15 @@ app.config["OUTPUT_FOLDER"] = "static"
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(app.config["OUTPUT_FOLDER"], exist_ok=True)
 
+# Favicon (para evitar error 500 en /favicon.ico)
+@app.route("/favicon.ico")
+def favicon():
+    return send_from_directory(
+        os.path.join(app.root_path, "static"),
+        "favicon.png",
+        mimetype="image/png"
+    )
+
 # Redirecciona la raíz a inglés como idioma predeterminado
 @app.route("/")
 def home_redirect():
@@ -23,6 +32,9 @@ def home_redirect():
 # Página principal por idioma
 @app.route("/<lang>", methods=["GET", "POST"])
 def index(lang):
+    if lang not in ["en", "es"]:
+        return "Idioma no válido", 404
+
     output_image = None
     original_image = None
 
@@ -37,7 +49,7 @@ def index(lang):
             upscale = 2
 
         if file:
-            # Nombre único para los archivos
+            # Nombre único
             base_name = os.path.splitext(file.filename)[0]
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             enhanced_filename = f"{base_name}_enhance_{timestamp}.png"
@@ -57,10 +69,14 @@ def index(lang):
             # Leer con OpenCV
             img_np = cv2.imread(input_path)
 
-            # Downscale si es muy grande (>500x500)
+            if img_np is None:
+                return "Error al leer la imagen. ¿Formato inválido?", 400
+
+            # Downscale si es muy grande
             max_dim = 500
             h, w = img_np.shape[:2]
             original_size = (w, h)
+
             if w > max_dim or h > max_dim:
                 aspect_ratio = w / h
                 if aspect_ratio > 1:
@@ -71,10 +87,11 @@ def index(lang):
                     new_w = int(max_dim * aspect_ratio)
                 img_np = cv2.resize(img_np, (new_w, new_h), interpolation=cv2.INTER_AREA)
 
-            # Configurar upsampler del fondo si está habilitado
+            # Upsampler del fondo
             bg_upsampler = None
             if usar_fondo:
-                model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)
+                model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64,
+                                num_block=23, num_grow_ch=32, scale=4)
                 bg_upsampler = RealESRGANer(
                     scale=upscale,
                     model_path='gfpgan/experiments/pretrained_models/RealESRGAN_x4plus.pth',
@@ -104,7 +121,7 @@ def index(lang):
             restored_rgb = cv2.cvtColor(restored_img, cv2.COLOR_BGR2RGB)
             result_pil = Image.fromarray(restored_rgb)
 
-            # Escalar resultado al tamaño correcto final
+            # Calcular tamaño final
             if upscale == 1:
                 final_size = original_size
             else:
@@ -113,23 +130,30 @@ def index(lang):
             result_pil = result_pil.resize(final_size, Image.LANCZOS)
             result_pil.save(output_path)
 
-            # Redimensionar original al mismo tamaño que resultado
             resized_original = img.resize(final_size, Image.LANCZOS)
             resized_original.save(original_copy_path)
 
-    return render_template(f"{lang}/index.html", output_image=output_image, original_image=original_image)
+    return render_template(f"{lang}/index.html",
+                           output_image=output_image,
+                           original_image=original_image)
 
-# Otras páginas por idioma
+# Páginas informativas
 @app.route("/<lang>/acerca")
 def acerca(lang):
+    if lang not in ["en", "es"]:
+        return "Idioma no válido", 404
     return render_template(f"{lang}/acerca.html")
 
 @app.route("/<lang>/como-usar")
 def como_usar(lang):
+    if lang not in ["en", "es"]:
+        return "Idioma no válido", 404
     return render_template(f"{lang}/como_usar.html")
 
 @app.route("/<lang>/privacidad")
 def privacidad(lang):
+    if lang not in ["en", "es"]:
+        return "Idioma no válido", 404
     return render_template(f"{lang}/privacidad.html")
 
 if __name__ == "__main__":

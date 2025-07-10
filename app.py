@@ -11,16 +11,23 @@ app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = "inputs"
 app.config["OUTPUT_FOLDER"] = "static"
 
+# Crear carpetas necesarias si no existen
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(app.config["OUTPUT_FOLDER"], exist_ok=True)
 
-@app.route("/", methods=["GET", "POST"])
-def index():
+# Redirecciona la raíz a inglés como idioma predeterminado
+@app.route("/")
+def home_redirect():
+    return redirect("/en")
+
+# Página principal por idioma
+@app.route("/<lang>", methods=["GET", "POST"])
+def index(lang):
     output_image = None
     original_image = None
 
     if request.method == "POST":
-        file = request.files["image"]
+        file = request.files.get("image")
         usar_fondo = request.form.get("mejorar_fondo") == "1"
         escala_str = request.form.get("escala", "2")
 
@@ -30,6 +37,7 @@ def index():
             upscale = 2
 
         if file:
+            # Nombre único para los archivos
             base_name = os.path.splitext(file.filename)[0]
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             enhanced_filename = f"{base_name}_enhance_{timestamp}.png"
@@ -42,30 +50,31 @@ def index():
             output_image = f"static/{enhanced_filename}"
             original_image = f"static/{original_filename}"
 
+            # Guardar imagen original
             img = Image.open(file).convert("RGB")
-            original_size = img.size  # (width, height)
-
-            # REDUCCIÓN si alguno de los lados supera 500px
-            max_side = max(original_size)
-            if max_side > 500:
-                aspect_ratio = original_size[0] / original_size[1]
-                if original_size[0] >= original_size[1]:
-                    new_size = (500, int(500 / aspect_ratio))
-                else:
-                    new_size = (int(500 * aspect_ratio), 500)
-                img = img.resize(new_size, Image.LANCZOS)
-
             img.save(input_path)
 
+            # Leer con OpenCV
             img_np = cv2.imread(input_path)
 
+            # Downscale si es muy grande (>500x500)
+            max_dim = 500
+            h, w = img_np.shape[:2]
+            original_size = (w, h)
+            if w > max_dim or h > max_dim:
+                aspect_ratio = w / h
+                if aspect_ratio > 1:
+                    new_w = max_dim
+                    new_h = int(max_dim / aspect_ratio)
+                else:
+                    new_h = max_dim
+                    new_w = int(max_dim * aspect_ratio)
+                img_np = cv2.resize(img_np, (new_w, new_h), interpolation=cv2.INTER_AREA)
+
+            # Configurar upsampler del fondo si está habilitado
             bg_upsampler = None
             if usar_fondo:
-                model = RRDBNet(
-                    num_in_ch=3, num_out_ch=3,
-                    num_feat=64, num_block=23,
-                    num_grow_ch=32, scale=4
-                )
+                model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)
                 bg_upsampler = RealESRGANer(
                     scale=upscale,
                     model_path='gfpgan/experiments/pretrained_models/RealESRGAN_x4plus.pth',
@@ -77,9 +86,10 @@ def index():
                     device='cpu'
                 )
 
+            # Restaurador facial
             restorer = GFPGANer(
                 model_path='gfpgan/experiments/pretrained_models/GFPGANv1.4.pth',
-                upscale=1,  # ya hacemos el upscale manualmente luego
+                upscale=upscale,
                 arch='clean',
                 channel_multiplier=2,
                 bg_upsampler=bg_upsampler,
@@ -90,30 +100,26 @@ def index():
                 img_np, has_aligned=False, only_center_face=False, paste_back=True
             )
 
+            # Convertir resultado y guardar
             restored_rgb = cv2.cvtColor(restored_img, cv2.COLOR_BGR2RGB)
             result_pil = Image.fromarray(restored_rgb)
 
-            # ⬆️ Escalar resultado final según tamaño ORIGINAL × upscale elegido
-            final_size = (original_size[0] * upscale, original_size[1] * upscale)
+            # Escalar resultado al tamaño correcto final
+            if upscale == 1:
+                final_size = original_size
+            else:
+                final_size = (original_size[0] * upscale, original_size[1] * upscale)
+
             result_pil = result_pil.resize(final_size, Image.LANCZOS)
             result_pil.save(output_path)
 
-            # Redimensionar copia original (con mismo tamaño que salida final)
-            img_original = Image.open(file).convert("RGB")
-            resized_original = img_original.resize(final_size, Image.LANCZOS)
+            # Redimensionar original al mismo tamaño que resultado
+            resized_original = img.resize(final_size, Image.LANCZOS)
             resized_original.save(original_copy_path)
 
-    return render_template("index.html", output_image=output_image, original_image=original_image)
+    return render_template(f"{lang}/index.html", output_image=output_image, original_image=original_image)
 
-# Rutas multilenguaje
-@app.route("/")
-def home():
-    return redirect("/en")
-
-@app.route("/<lang>")
-def index_lang(lang):
-    return render_template(f"{lang}/index.html")
-
+# Otras páginas por idioma
 @app.route("/<lang>/acerca")
 def acerca(lang):
     return render_template(f"{lang}/acerca.html")

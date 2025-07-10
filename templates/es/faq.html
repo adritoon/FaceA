@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Preguntas Frecuentes - GlowFace</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      margin: 0;
+      background-color: #fff;
+      color: #000;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark {
+      background-color: #121212;
+      color: #eee;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    h2 {
+      margin-top: 30px;
+      color: #007bff;
+    }
+    #footer {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: #f0f0f0;
+      text-align: center;
+    }
+    #footer a {
+      color: #007bff;
+      margin: 0 10px;
+      text-decoration: none;
+    }
+    #footer a:hover {
+      text-decoration: underline;
+    }
+    body.dark #footer {
+      background-color: #121212;
+      color: #ccc;
+    }
+    body.dark #footer a {
+      color: #9fc3ff;
+    }
+    .theme-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 14px;
+      padding: 6px 10px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    body.dark .theme-toggle {
+      background: #eee;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">🌗 Modo oscuro</button>
+
+  <div class="container">
+    <h1>Preguntas Frecuentes</h1>
+
+    <h2>¿Qué significa “Mejorar imagen” y cómo funciona?</h2>
+    <p>GlowFace utiliza inteligencia artificial para mejorar rostros en fotos. Restaura nitidez, corrige áreas borrosas y realza los detalles faciales. Solo subes tu imagen y en segundos verás el resultado mejorado.</p>
+
+    <h2>¿Mis fotos se almacenan o se comparten?</h2>
+    <p>No. Las imágenes se procesan temporalmente en memoria y se eliminan de inmediato. Nunca se almacenan ni se comparten.</p>
+
+    <h2>¿Alguien más puede ver mis imágenes?</h2>
+    <p>En absoluto. Tus fotos son privadas y no son visibles para nadie más.</p>
+
+    <h2>¿Hay limitaciones en lo que GlowFace puede mejorar?</h2>
+    <p>GlowFace funciona mejor con fotos claras y de buena calidad. Si la imagen es muy pequeña, borrosa o con poca luz, los resultados pueden no ser óptimos.</p>
+  </div>
+
+  <div id="footer">
+    <a href="/es">Inicio</a>
+    <a href="/es/acerca">Acerca de</a>
+    <a href="/es/como-usar">Cómo usar</a>
+    <a href="/es/privacidad">Política de privacidad</a>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.classList.toggle("dark");
+      localStorage.setItem("darkMode", isDark ? "1" : "0");
+    }
+    window.onload = () => {
+      if (localStorage.getItem("darkMode") === "1") {
+        document.body.classList.add("dark");
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FAQs - GlowFace</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      margin: 0;
+      background-color: #fff;
+      color: #000;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark {
+      background-color: #121212;
+      color: #eee;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    h2 {
+      margin-top: 30px;
+      color: #007bff;
+    }
+    #footer {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: #f0f0f0;
+      text-align: center;
+    }
+    #footer a {
+      color: #007bff;
+      margin: 0 10px;
+      text-decoration: none;
+    }
+    #footer a:hover {
+      text-decoration: underline;
+    }
+    body.dark #footer {
+      background-color: #121212;
+      color: #ccc;
+    }
+    body.dark #footer a {
+      color: #9fc3ff;
+    }
+    .theme-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 14px;
+      padding: 6px 10px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    body.dark .theme-toggle {
+      background: #eee;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">🌗 Dark Mode</button>
+
+  <div class="container">
+    <h1>Frequently Asked Questions</h1>
+
+    <h2>What does “Enhance” mean and how does it work?</h2>
+    <p>GlowFace uses AI to enhance facial photos by restoring sharpness, fixing blurry areas, and increasing clarity. You just upload a photo — we process it automatically and give you a cleaner, more defined result in seconds.</p>
+
+    <h2>Are my photos stored or shared?</h2>
+    <p>No. Your photos are processed temporarily in memory and deleted immediately after. We never store, save, or share your files.</p>
+
+    <h2>Can anyone else see the images I upload?</h2>
+    <p>Absolutely not. Your images are private. They’re never visible to us or any third party.</p>
+
+    <h2>Are there limitations to what GlowFace can improve?</h2>
+    <p>GlowFace works best with clear, high-quality photos. It can improve most faces, but results may vary if the image is too small, extremely blurry, or poorly lit.</p>
+  </div>
+
+  <div id="footer">
+    <a href="/">Home</a>
+    <a href="/en/about">About</a>
+    <a href="/en/how-to-use">How to Use</a>
+    <a href="/en/privacy">Privacy Policy</a>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.classList.toggle("dark");
+      localStorage.setItem("darkMode", isDark ? "1" : "0");
+    }
+    window.onload = () => {
+      if (localStorage.getItem("darkMode") === "1") {
+        document.body.classList.add("dark");
+      }
+    };
+  </script>
+</body>
+</html>

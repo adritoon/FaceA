@@ -11,11 +11,9 @@ app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = "inputs"
 app.config["OUTPUT_FOLDER"] = "static"
 
-# Crear carpetas necesarias si no existen
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(app.config["OUTPUT_FOLDER"], exist_ok=True)
 
-# Favicon (para evitar error 500 en /favicon.ico)
 @app.route("/favicon.ico")
 def favicon():
     return send_from_directory(
@@ -24,12 +22,10 @@ def favicon():
         mimetype="image/png"
     )
 
-# Redirecciona la raíz a inglés como idioma predeterminado
 @app.route("/")
 def home_redirect():
     return redirect("/en")
 
-# Página principal por idioma
 @app.route("/<lang>", methods=["GET", "POST"])
 def index(lang):
     if lang not in ["en", "es"]:
@@ -41,6 +37,7 @@ def index(lang):
     if request.method == "POST":
         file = request.files.get("image")
         usar_fondo = request.form.get("mejorar_fondo") == "1"
+        modo_dibujo = request.form.get("modo_dibujo") == "1"
         escala_str = request.form.get("escala", "2")
 
         try:
@@ -49,7 +46,6 @@ def index(lang):
             upscale = 2
 
         if file:
-            # Nombre único
             base_name = os.path.splitext(file.filename)[0]
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             enhanced_filename = f"{base_name}_enhance_{timestamp}.png"
@@ -62,17 +58,13 @@ def index(lang):
             output_image = f"static/{enhanced_filename}"
             original_image = f"static/{original_filename}"
 
-            # Guardar imagen original
             img = Image.open(file).convert("RGB")
             img.save(input_path)
 
-            # Leer con OpenCV
             img_np = cv2.imread(input_path)
-
             if img_np is None:
                 return "Error al leer la imagen. ¿Formato inválido?", 400
 
-            # Downscale si es muy grande
             max_dim = 500
             h, w = img_np.shape[:2]
             original_size = (w, h)
@@ -87,14 +79,16 @@ def index(lang):
                     new_w = int(max_dim * aspect_ratio)
                 img_np = cv2.resize(img_np, (new_w, new_h), interpolation=cv2.INTER_AREA)
 
-            # Upsampler del fondo
-            bg_upsampler = None
-            if usar_fondo:
-                model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64,
-                                num_block=23, num_grow_ch=32, scale=4)
-                bg_upsampler = RealESRGANer(
+            if modo_dibujo:
+                # Usar modelo anime directamente (sin GFPGAN)
+                model = RRDBNet(
+                    num_in_ch=3, num_out_ch=3,
+                    num_feat=64, num_block=6,
+                    num_grow_ch=32, scale=4
+                )
+                anime_upsampler = RealESRGANer(
                     scale=upscale,
-                    model_path='gfpgan/experiments/pretrained_models/RealESRGAN_x4plus.pth',
+                    model_path='gfpgan/experiments/pretrained_models/RealESRGAN_x4plus_anime_6B.pth',
                     model=model,
                     tile=0,
                     tile_pad=10,
@@ -102,26 +96,44 @@ def index(lang):
                     half=False,
                     device='cpu'
                 )
+                output, _ = anime_upsampler.enhance(img_np, outscale=upscale)
+                restored_rgb = cv2.cvtColor(output, cv2.COLOR_BGR2RGB)
 
-            # Restaurador facial
-            restorer = GFPGANer(
-                model_path='gfpgan/experiments/pretrained_models/GFPGANv1.4.pth',
-                upscale=upscale,
-                arch='clean',
-                channel_multiplier=2,
-                bg_upsampler=bg_upsampler,
-                device='cpu'
-            )
+            else:
+                # Usar GFPGAN con fondo opcional
+                bg_upsampler = None
+                if usar_fondo:
+                    model = RRDBNet(
+                        num_in_ch=3, num_out_ch=3,
+                        num_feat=64, num_block=23,
+                        num_grow_ch=32, scale=4
+                    )
+                    bg_upsampler = RealESRGANer(
+                        scale=upscale,
+                        model_path='gfpgan/experiments/pretrained_models/RealESRGAN_x4plus.pth',
+                        model=model,
+                        tile=0,
+                        tile_pad=10,
+                        pre_pad=0,
+                        half=False,
+                        device='cpu'
+                    )
 
-            _, _, restored_img = restorer.enhance(
-                img_np, has_aligned=False, only_center_face=False, paste_back=True
-            )
+                restorer = GFPGANer(
+                    model_path='gfpgan/experiments/pretrained_models/GFPGANv1.4.pth',
+                    upscale=upscale,
+                    arch='clean',
+                    channel_multiplier=2,
+                    bg_upsampler=bg_upsampler,
+                    device='cpu'
+                )
+                _, _, restored_img = restorer.enhance(
+                    img_np, has_aligned=False, only_center_face=False, paste_back=True
+                )
+                restored_rgb = cv2.cvtColor(restored_img, cv2.COLOR_BGR2RGB)
 
-            # Convertir resultado y guardar
-            restored_rgb = cv2.cvtColor(restored_img, cv2.COLOR_BGR2RGB)
             result_pil = Image.fromarray(restored_rgb)
 
-            # Calcular tamaño final
             if upscale == 1:
                 final_size = original_size
             else:
@@ -137,24 +149,29 @@ def index(lang):
                            output_image=output_image,
                            original_image=original_image)
 
-# Páginas informativas
-@app.route("/<lang>/acerca")
+@app.route("/<lang>/about")
 def acerca(lang):
     if lang not in ["en", "es"]:
         return "Idioma no válido", 404
-    return render_template(f"{lang}/acerca.html")
+    return render_template(f"{lang}/about.html")
 
-@app.route("/<lang>/como-usar")
+@app.route("/<lang>/how-to-use")
 def como_usar(lang):
     if lang not in ["en", "es"]:
         return "Idioma no válido", 404
-    return render_template(f"{lang}/como-usar.html")
+    return render_template(f"{lang}/how-to-use.html")
 
-@app.route("/<lang>/privacidad")
+@app.route("/<lang>/privacy")
 def privacidad(lang):
     if lang not in ["en", "es"]:
         return "Idioma no válido", 404
-    return render_template(f"{lang}/privacidad.html")
+    return render_template(f"{lang}/privacy.html")
+
+@app.route("/<lang>/faq")
+def faq(lang):
+    if lang not in ["en", "es"]:
+        return "Idioma no válido", 404
+    return render_template(f"{lang}/faq.html")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))

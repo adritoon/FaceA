@@ -7,11 +7,10 @@ from PIL import Image
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from gfpgan import GFPGANer
 from realesrgan import RealESRGANer
-from google.cloud import tasks_v2, storage
-from werkzeug.utils import secure_filename
+from google.cloud import tasks_v2
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "supersecret")
+app.secret_key = os.environ.get("SECRET_KEY", "dev")
 app.config["UPLOAD_FOLDER"] = "inputs"
 app.config["OUTPUT_FOLDER"] = "static"
 
@@ -22,7 +21,6 @@ GCP_PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
 TASK_HANDLER_URL = os.environ.get("TASK_HANDLER_URL")
 QUEUE_ID = "image-processing"
 LOCATION = "us-central1"
-BUCKET_NAME = os.environ.get("GCS_BUCKET")
 
 @app.route("/favicon.ico")
 def favicon():
@@ -45,6 +43,22 @@ def index(lang):
     original_image = None
     is_processing = False
 
+    # ✅ Verificar si hay una imagen previa en procesamiento
+    last_id = session.get("last_id")
+    if last_id:
+        enhanced_filename = f"{last_id}_enhance.png"
+        original_filename = f"{last_id}_original.png"
+        output_path = os.path.join(app.config["OUTPUT_FOLDER"], enhanced_filename)
+        original_copy_path = os.path.join(app.config["OUTPUT_FOLDER"], original_filename)
+
+        if os.path.exists(output_path) and os.path.exists(original_copy_path):
+            output_image = f"static/{enhanced_filename}"
+            original_image = f"static/{original_filename}"
+            is_processing = False
+            session.pop("last_id", None)
+        else:
+            is_processing = True
+
     if request.method == "POST":
         file = request.files.get("image")
         usar_fondo = request.form.get("mejorar_fondo") == "1"
@@ -52,22 +66,17 @@ def index(lang):
         escala = int(request.form.get("escala", "2"))
 
         if file:
-            base_name = os.path.splitext(secure_filename(file.filename))[0]
+            base_name = os.path.splitext(file.filename)[0]
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             unique_id = f"{base_name}_{timestamp}"
-            session["last_id"] = unique_id
 
             input_path = os.path.join(app.config["UPLOAD_FOLDER"], f"{unique_id}.png")
             file.save(input_path)
 
-            # Subir archivo a Cloud Storage
-            storage_client = storage.Client()
-            bucket = storage_client.bucket(BUCKET_NAME)
-            blob = bucket.blob(f"inputs/{unique_id}.png")
-            blob.upload_from_filename(input_path)
+            session["last_id"] = unique_id
 
             payload = {
-                "gcs_input_path": f"inputs/{unique_id}.png",
+                "image_path": input_path,
                 "use_background": usar_fondo,
                 "anime_mode": modo_dibujo,
                 "upscale": escala,
@@ -89,22 +98,8 @@ def index(lang):
 
             client.create_task(request={"parent": parent, "task": task})
             is_processing = True
+
             return render_template(f"{lang}/index.html", is_processing=True, output_image=None, original_image=None)
-
-    # Verificación si ya fue procesada
-    if "last_id" in session:
-        unique_id = session["last_id"]
-        enhanced_filename = f"{unique_id}_enhance.png"
-        original_filename = f"{unique_id}_original.png"
-        storage_client = storage.Client()
-        bucket = storage_client.bucket(BUCKET_NAME)
-        enhanced_blob = bucket.blob(f"outputs/{enhanced_filename}")
-        original_blob = bucket.blob(f"outputs/{original_filename}")
-
-        if enhanced_blob.exists() and original_blob.exists():
-            output_image = enhanced_blob.public_url
-            original_image = original_blob.public_url
-            is_processing = False
 
     return render_template(f"{lang}/index.html", is_processing=is_processing, output_image=output_image, original_image=original_image)
 
@@ -112,26 +107,20 @@ def index(lang):
 def process_task():
     data = request.get_json()
 
-    gcs_input_path = data["gcs_input_path"]
+    image_path = data["image_path"]
     usar_fondo = data["use_background"]
     modo_dibujo = data["anime_mode"]
     upscale = int(data["upscale"])
     output_name = data["output_name"]
 
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(BUCKET_NAME)
-
-    input_blob = bucket.blob(gcs_input_path)
-    local_input = f"inputs/{output_name}.png"
-    input_blob.download_to_filename(local_input)
-
     enhanced_filename = f"{output_name}_enhance.png"
     original_filename = f"{output_name}_original.png"
-    output_path = f"static/{enhanced_filename}"
-    original_copy_path = f"static/{original_filename}"
 
-    img = Image.open(local_input).convert("RGB")
-    img_np = cv2.imread(local_input)
+    output_path = os.path.join(app.config["OUTPUT_FOLDER"], enhanced_filename)
+    original_copy_path = os.path.join(app.config["OUTPUT_FOLDER"], original_filename)
+
+    img = Image.open(image_path).convert("RGB")
+    img_np = cv2.imread(image_path)
     h, w = img_np.shape[:2]
     original_size = (w, h)
 
@@ -182,21 +171,17 @@ def process_task():
 
     result_pil = Image.fromarray(restored_rgb)
 
-    if upscale == 1:
-        final_size = original_size
-    else:
-        final_size = (original_size[0] * upscale, original_size[1] * upscale)
+    final_size = (original_size[0] * upscale, original_size[1] * upscale) if upscale != 1 else original_size
 
     result_pil = result_pil.resize(final_size, Image.LANCZOS)
     result_pil.save(output_path)
+
     resized_original = img.resize(final_size, Image.LANCZOS)
     resized_original.save(original_copy_path)
 
-    bucket.blob(f"outputs/{enhanced_filename}").upload_from_filename(output_path)
-    bucket.blob(f"outputs/{original_filename}").upload_from_filename(original_copy_path)
-
     return jsonify({"status": "ok"}), 200
 
+# Páginas informativas
 @app.route("/<lang>/about")
 def acerca(lang):
     if lang not in ["en", "es"]:

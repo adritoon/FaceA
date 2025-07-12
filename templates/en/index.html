@@ -221,6 +221,7 @@
 
 
 </head>
+<!-- Cambios clave: se agregó la animación de carga en #loadingOverlay -->
 <body>
   <main>
     <div class="lang-switch">
@@ -231,7 +232,15 @@
 
     <h1>AI Face Enhancer</h1>
 
-    <div class="container">
+    <!-- Capa de carga -->
+    {% if is_processing %}
+    <div id="loadingOverlay" style="text-align:center; margin-top:40px;">
+      <img src="{{ url_for('static', filename='loading.gif') }}" alt="Loading..." style="max-width:180px;">
+      <p>Enhancing your image... Please wait ⏳</p>
+    </div>
+    {% endif %}
+
+    <div class="container" {% if is_processing %}style="display:none;"{% endif %}>
       {% if output_image and original_image %}
       <div class="image-panel">
         <img id="resultImg" src="{{ output_image }}">
@@ -241,36 +250,25 @@
       <div class="form-panel">
         <form method="POST" enctype="multipart/form-data">
           <input type="file" name="image" accept="image/*" required>
-
-          <label>
-            <input type="checkbox" name="mejorar_fondo" value="1">
-            Also enhance background (slower)
-          </label>
-          <label>
-            <input type="checkbox" name="modo_dibujo" value="1">
-            Enhance ilustrations
-          </label>
+          <label><input type="checkbox" name="mejorar_fondo" value="1"> Also enhance background (slower)</label>
+          <label><input type="checkbox" name="modo_dibujo" value="1"> Enhance illustrations</label>
 
           <div class="select-row">
             <label for="escala">Upscale factor:</label>
             <select name="escala" id="escala">
-              <option value="1">1x (no upscale)</option>
-              <option value="2" selected>2x (recommended)</option>
-              <option value="4">4x (maximum quality)</option>
+              <option value="1">1x</option>
+              <option value="2" selected>2x</option>
+              <option value="4">4x</option>
             </select>
           </div>
 
-          <button type="submit" onclick="gtag('event', 'click', { 'event_category': 'Button', 'event_label': 'Enhance Image' });">
-            Enhance Image
-          </button>
+          <button type="submit">Enhance Image</button>
         </form>
 
         {% if output_image and original_image %}
         <div class="controls">
           <button onclick="toggleImage()">Toggle Original / Enhanced</button>
-          <a href="{{ output_image }}" download onclick="gtag('event', 'click', { 'event_category': 'Button', 'event_label': 'Download Image' });">
-            ⬇️ Download enhanced image
-          </a>
+          <a href="{{ output_image }}" download>⬇️ Download enhanced image</a>
         </div>
         {% endif %}
       </div>
@@ -285,8 +283,7 @@
       }
 
       function toggleTheme() {
-        const body = document.body;
-        const isDark = body.classList.toggle("dark");
+        const isDark = document.body.classList.toggle("dark");
         localStorage.setItem("darkMode", isDark ? "1" : "0");
       }
 

@@ -237,6 +237,11 @@
       <img src="{{ url_for('static', filename='loading.gif') }}" alt="Cargando..." style="max-width:180px;">
       <p>Mejorando tu imagen... Por favor espera ⏳</p>
     </div>
+    <script>
+    setTimeout(() => {
+      location.reload();  // Reintenta recargar cada 2.5s
+    }, 2500);
+  </script>
     {% endif %}
 
     <div class="container" {% if is_processing %}style="display:none;"{% endif %}>

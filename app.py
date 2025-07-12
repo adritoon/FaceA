@@ -1,18 +1,17 @@
 import os
 import cv2
 import json
-import base64
-import requests
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, send_from_directory, jsonify
+from flask import Flask, render_template, request, redirect, send_from_directory, jsonify, session
 from PIL import Image
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from gfpgan import GFPGANer
 from realesrgan import RealESRGANer
 from google.cloud import tasks_v2
-from google.protobuf import timestamp_pb2
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "default-secret")  # Necesario para usar session
+
 app.config["UPLOAD_FOLDER"] = "inputs"
 app.config["OUTPUT_FOLDER"] = "static"
 
@@ -45,6 +44,22 @@ def index(lang):
     original_image = None
     is_processing = False
 
+    # Chequea si hay una tarea previa aún en proceso
+    unique_id = session.get("last_id")
+    if unique_id:
+        enhanced_filename = f"{unique_id}_enhance.png"
+        original_filename = f"{unique_id}_original.png"
+        output_path = os.path.join(app.config["OUTPUT_FOLDER"], enhanced_filename)
+        original_copy_path = os.path.join(app.config["OUTPUT_FOLDER"], original_filename)
+
+        if os.path.exists(output_path) and os.path.exists(original_copy_path):
+            output_image = f"static/{enhanced_filename}"
+            original_image = f"static/{original_filename}"
+            is_processing = False
+            session.pop("last_id", None)
+        else:
+            is_processing = True
+
     if request.method == "POST":
         file = request.files.get("image")
         usar_fondo = request.form.get("mejorar_fondo") == "1"
@@ -55,6 +70,7 @@ def index(lang):
             base_name = os.path.splitext(file.filename)[0]
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             unique_id = f"{base_name}_{timestamp}"
+            session["last_id"] = unique_id  # Se guarda para hacer polling en futuras visitas
 
             input_path = os.path.join(app.config["UPLOAD_FOLDER"], f"{unique_id}.png")
             file.save(input_path)
@@ -68,7 +84,6 @@ def index(lang):
                 "output_name": unique_id
             }
 
-            # Encolar tarea
             client = tasks_v2.CloudTasksClient()
             parent = client.queue_path(GCP_PROJECT_ID, LOCATION, QUEUE_ID)
 
@@ -84,9 +99,10 @@ def index(lang):
             client.create_task(request={"parent": parent, "task": task})
             is_processing = True
 
-            return render_template(f"{lang}/index.html", is_processing=True, output_image=None, original_image=None)
-
-    return render_template(f"{lang}/index.html", is_processing=is_processing, output_image=output_image, original_image=original_image)
+    return render_template(f"{lang}/index.html",
+                           is_processing=is_processing,
+                           output_image=output_image,
+                           original_image=original_image)
 
 @app.route("/task-handler", methods=["POST"])
 def process_task():
@@ -109,7 +125,6 @@ def process_task():
     h, w = img_np.shape[:2]
     original_size = (w, h)
 
-    # Downscale si es necesario
     max_dim = 500
     if w > max_dim or h > max_dim:
         aspect_ratio = w / h
@@ -156,12 +171,7 @@ def process_task():
         restored_rgb = cv2.cvtColor(restored_img, cv2.COLOR_BGR2RGB)
 
     result_pil = Image.fromarray(restored_rgb)
-
-    if upscale == 1:
-        final_size = original_size
-    else:
-        final_size = (original_size[0] * upscale, original_size[1] * upscale)
-
+    final_size = (original_size[0] * upscale, original_size[1] * upscale) if upscale > 1 else original_size
     result_pil = result_pil.resize(final_size, Image.LANCZOS)
     result_pil.save(output_path)
 
@@ -170,8 +180,7 @@ def process_task():
 
     return jsonify({"status": "ok"}), 200
 
-# Rutas adicionales
-
+# Páginas informativas
 @app.route("/<lang>/about")
 def acerca(lang):
     if lang not in ["en", "es"]:

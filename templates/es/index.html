@@ -3,6 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <title>Mejorador Facial - GlowFace</title>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VCC08QD46V"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-VCC08QD46V');
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6048928625187693"
+     crossorigin="anonymous"></script>
+
+  <!-- OpenGraph Tags for Spanish -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="GlowFace – Mejora de Rostros con IA">
+  <meta property="og:description" content="Mejora fotos de rostros con inteligencia artificial. Rápido, privado y gratuito.">
+  <meta property="og:image" content="{{ url_for('static', filename='og-preview.png', _external=True) }}">
+  <meta property="og:url" content="https://glowface.art/es">
+  <meta property="og:locale" content="es_ES">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="GlowFace – Mejora de Rostros con IA">
+  <meta name="twitter:description" content="Mejora fotos de rostros con inteligencia artificial. Rápido, privado y gratuito.">
+  <meta name="twitter:image" content="{{ url_for('static', filename='og-preview.jpg', _external=True) }}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -231,6 +257,15 @@
         form.addEventListener("submit", () => {
           document.querySelector(".form-panel form").style.display = "none";
           document.getElementById("loading-gif").style.display = "block";
+
+          // Google Analytics: clic en botón de mejorar imagen
+          if (typeof gtag === "function") {
+            gtag('event', 'click', {
+              'event_category': 'mejorador',
+              'event_label': 'Clic en mejorar imagen',
+              'value': 1
+            });
+          }
         });
       }
     };
@@ -254,29 +289,7 @@
       }
     });
   </script>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VCC08QD46V"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-VCC08QD46V');
-  </script>
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6048928625187693"
-     crossorigin="anonymous"></script>
-  <!-- OpenGraph Tags for Spanish -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="GlowFace – Mejora de Rostros con IA">
-  <meta property="og:description" content="Mejora fotos de rostros con inteligencia artificial. Rápido, privado y gratuito.">
-  <meta property="og:image" content="{{ url_for('static', filename='og-preview.png', _external=True) }}">
-  <meta property="og:url" content="https://glowface.art/es">
-  <meta property="og:locale" content="es_ES">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="GlowFace – Mejora de Rostros con IA">
-  <meta name="twitter:description" content="Mejora fotos de rostros con inteligencia artificial. Rápido, privado y gratuito.">
-  <meta name="twitter:image" content="{{ url_for('static', filename='og-preview.jpg', _external=True) }}">
-
+  
 </head>
 <body>
   <main>
@@ -316,7 +329,11 @@
         {% if output_image and original_image %}
         <div class="controls">
           <button class="toggle-btn active" onclick="toggleImage(this)">Mostrar original</button>
-          <a href="{{ output_image }}" download>⬇️ Descargar imagen mejorada</a>
+          <a href="{{ output_image }}" download onclick="gtag('event', 'download', {
+            'event_category': 'descarga',
+            'event_label': 'Descarga de imagen mejorada',
+            'value': 1
+          })">⬇️ Descargar imagen mejorada</a>
         </div>
         {% endif %}
       </div>

@@ -254,6 +254,28 @@
       }
     });
   </script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VCC08QD46V"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-VCC08QD46V');
+  </script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6048928625187693"
+     crossorigin="anonymous"></script>
+  <!-- OpenGraph Tags for English -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="GlowFace – AI Photo Enhancer">
+  <meta property="og:description" content="Enhance your face photos using powerful AI. It's fast, private, and free.">
+  <meta property="og:image" content="{{ url_for('static', filename='og-preview.png', _external=True) }}">
+  <meta property="og:url" content="https://glowface.art/">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="GlowFace – AI Photo Enhancer">
+  <meta name="twitter:description" content="Enhance your face photos using powerful AI. Fast, private, and free.">
+  <meta name="twitter:image" content="{{ url_for('static', filename='og-preview.png', _external=True) }}">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
 </head>
 <body>
   <main>

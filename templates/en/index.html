@@ -1,51 +1,263 @@
-<!-- index.html (EN version) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Face Enhancer - GlowFace</title>
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <style>
-    /* ... Estilos existentes aquí ... */
-    #loadingIndicator {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 20px;
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.3s, color 0.3s;
     }
-    #preview {
+
+    body.dark {
+      background-color: #121212;
+      color: #f0f0f0;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 30px;
+      gap: 30px;
+    }
+
+    .image-panel img {
       max-width: 100%;
       max-height: 80vh;
-      display: none;
+      display: block;
       margin: auto;
       border: 1px solid #ccc;
     }
+
+    .form-panel {
+      flex: 1 1 400px;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .form-panel form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .form-panel input[type="file"],
+    .form-panel select,
+    .form-panel button {
+      font-size: 16px;
+      padding: 8px 12px;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .form-panel label {
+      font-size: 16px;
+    }
+
+    .select-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button, a {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      cursor: pointer;
+      text-align: center;
+      font-size: 16px;
+      padding: 10px 20px;
+    }
+
+    button:hover, a:hover {
+      background-color: #0056b3;
+    }
+
+    body.dark button,
+    body.dark a {
+      background-color: #3366cc;
+    }
+
+    body.dark button:hover,
+    body.dark a:hover {
+      background-color: #224488;
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 14px;
+      padding: 6px 10px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    body.dark .theme-toggle {
+      background: #eee;
+      color: black;
+    }
+
+    .lang-switch {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+
+    .lang-switch img {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .loading {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .toggle-btn.active {
+      background-color: #28a745;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 20px;
+      }
+
+      .image-panel img {
+        max-height: 60vh;
+      }
+    }
+
+    #footer {
+      background-color: #f0f0f0;
+      color: #333;
+      padding: 20px;
+      text-align: center;
+    }
+
+    #footer a {
+      color: #007bff;
+      text-decoration: none;
+      margin: 0 10px;
+    }
+
+    #footer a:hover {
+      text-decoration: underline;
+    }
+
+    body.dark #footer {
+      background-color: #121212;
+      color: #ccc;
+    }
+
+    body.dark #footer a {
+      color: #9fc3ff;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body {
+      flex: 1;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
   </style>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VCC08QD46V"></script>
+
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-VCC08QD46V');
+    let showingOriginal = false;
+    function toggleImage(btn) {
+      const img = document.getElementById("resultImg");
+      showingOriginal = !showingOriginal;
+      img.src = showingOriginal ? "{{ original_image }}" : "{{ output_image }}";
+      btn.classList.toggle("active", !showingOriginal);
+      btn.textContent = showingOriginal ? "Show Enhanced" : "Show Original";
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.classList.toggle("dark");
+      localStorage.setItem("darkMode", isDark ? "1" : "0");
+    }
+
+    window.onload = () => {
+      if (localStorage.getItem("darkMode") === "1") {
+        document.body.classList.add("dark");
+      }
+
+      const form = document.querySelector("form");
+      if (form) {
+        form.addEventListener("submit", () => {
+          document.querySelector(".form-panel form").style.display = "none";
+          document.getElementById("loading-gif").style.display = "block";
+        });
+      }
+    };
   </script>
 </head>
 <body>
   <main>
     <div class="lang-switch">
-      <a href="/es"><img src="{{ url_for('static', filename='es.png') }}" alt="Español" style="width: 24px; height: 16px;"></a>
+      <a href="/es"><img src="{{ url_for('static', filename='es.png') }}" alt="Español"></a>
     </div>
+
     <button class="theme-toggle" onclick="toggleTheme()">🌗 Dark Mode</button>
+
     <h1>AI Face Enhancer</h1>
+
     <div class="container">
+      {% if output_image and original_image %}
       <div class="image-panel">
-        <img id="resultImg" src="{% if output_image %}{{ output_image }}{% endif %}" style="display: {% if output_image %}block{% else %}none{% endif %};">
-        <img id="preview" src="#" alt="preview">
+        <img id="resultImg" src="{{ output_image }}">
       </div>
+      {% endif %}
+
       <div class="form-panel">
-        <form id="uploadForm" method="POST" enctype="multipart/form-data" onsubmit="startProcessing()">
-          <input type="file" name="image" accept="image/*" required onchange="showPreview(this)">
+        <form method="POST" enctype="multipart/form-data">
+          <input type="file" name="image" accept="image/*" required>
           <label><input type="checkbox" name="mejorar_fondo" value="1"> Also enhance background (slower)</label>
-          <label><input type="checkbox" name="modo_dibujo" value="1"> Enhance illustrations</label>
+          <label><input type="checkbox" name="modo_dibujo" value="1"> Enhance ilustrations</label>
           <div class="select-row">
             <label for="escala">Upscale factor:</label>
             <select name="escala" id="escala">
@@ -56,54 +268,17 @@
           </div>
           <button type="submit">Enhance Image</button>
         </form>
-        <div id="loadingIndicator">
-          <img src="{{ url_for('static', filename='loading.gif') }}" alt="Processing..." style="width: 80px;">
-          <p>Processing image...</p>
-        </div>
+        <img id="loading-gif" src="{{ url_for('static', filename='loading.gif') }}" class="loading">
         {% if output_image and original_image %}
         <div class="controls">
-          <button id="toggleBtn" onclick="toggleImage()">Toggle Original / Enhanced</button>
+          <button class="toggle-btn active" onclick="toggleImage(this)">Show Original</button>
           <a href="{{ output_image }}" download>⬇️ Download enhanced image</a>
         </div>
         {% endif %}
       </div>
     </div>
-    <script>
-      let showingOriginal = false;
-      function toggleImage() {
-        const img = document.getElementById("resultImg");
-        showingOriginal = !showingOriginal;
-        img.src = showingOriginal ? "{{ original_image }}" : "{{ output_image }}";
-        const btn = document.getElementById("toggleBtn");
-        btn.textContent = showingOriginal ? "Show Enhanced" : "Show Original";
-        btn.style.backgroundColor = showingOriginal ? "#28a745" : "#007bff";
-      }
-      function toggleTheme() {
-        const body = document.body;
-        const isDark = body.classList.toggle("dark");
-        localStorage.setItem("darkMode", isDark ? "1" : "0");
-      }
-      function startProcessing() {
-        document.getElementById("uploadForm").style.display = "none";
-        document.getElementById("loadingIndicator").style.display = "flex";
-        document.getElementById("preview").style.display = "none";
-      }
-      function showPreview(input) {
-        const file = input.files[0];
-        if (file) {
-          const preview = document.getElementById("preview");
-          preview.src = URL.createObjectURL(file);
-          preview.style.display = "block";
-          document.getElementById("resultImg").style.display = "none";
-        }
-      }
-      window.onload = () => {
-        if (localStorage.getItem("darkMode") === "1") {
-          document.body.classList.add("dark");
-        }
-      };
-    </script>
   </main>
+
   <footer id="footer">
     <a href="/en/about">About</a> |
     <a href="/en/how-to-use">How to Use</a> |

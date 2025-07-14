@@ -1,18 +1,27 @@
 import os
 import cv2
+import time
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, send_from_directory
 from PIL import Image
+from werkzeug.utils import secure_filename
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from gfpgan import GFPGANer
 from realesrgan import RealESRGANer
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = "inputs"
-app.config["OUTPUT_FOLDER"] = "static"
+app.config["OUTPUT_FOLDER"] = "static/outputs"
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(app.config["OUTPUT_FOLDER"], exist_ok=True)
+
+def cleanup_old_files(folder, max_age=3600):
+    now = time.time()
+    for f in os.listdir(folder):
+        path = os.path.join(folder, f)
+        if os.path.isfile(path) and now - os.path.getmtime(path) > max_age:
+            os.remove(path)
 
 @app.route("/favicon.ico")
 def favicon():
@@ -24,12 +33,17 @@ def favicon():
 
 @app.route("/")
 def home_redirect():
-    return redirect("/en")
+    lang = request.accept_languages.best_match(["en", "es"])
+    return redirect(f"/{lang or 'en'}")
 
 @app.route("/<lang>", methods=["GET", "POST"])
 def index(lang):
     if lang not in ["en", "es"]:
         return "Idioma no válido", 404
+
+    # Limpieza de archivos antiguos
+    cleanup_old_files(app.config["UPLOAD_FOLDER"])
+    cleanup_old_files(app.config["OUTPUT_FOLDER"])
 
     output_image = None
     original_image = None
@@ -46,17 +60,18 @@ def index(lang):
             upscale = 2
 
         if file:
-            base_name = os.path.splitext(file.filename)[0]
+            safe_filename = secure_filename(file.filename)
+            base_name = os.path.splitext(safe_filename)[0]
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             enhanced_filename = f"{base_name}_enhance_{timestamp}.png"
             original_filename = f"{base_name}_original_{timestamp}.png"
 
-            input_path = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
+            input_path = os.path.join(app.config["UPLOAD_FOLDER"], safe_filename)
             output_path = os.path.join(app.config["OUTPUT_FOLDER"], enhanced_filename)
             original_copy_path = os.path.join(app.config["OUTPUT_FOLDER"], original_filename)
 
-            output_image = f"static/{enhanced_filename}"
-            original_image = f"static/{original_filename}"
+            output_image = f"outputs/{enhanced_filename}"
+            original_image = f"outputs/{original_filename}"
 
             img = Image.open(file).convert("RGB")
             img.save(input_path)
@@ -80,7 +95,6 @@ def index(lang):
                 img_np = cv2.resize(img_np, (new_w, new_h), interpolation=cv2.INTER_AREA)
 
             if modo_dibujo:
-                # Usar modelo anime directamente (sin GFPGAN)
                 model = RRDBNet(
                     num_in_ch=3, num_out_ch=3,
                     num_feat=64, num_block=6,
@@ -100,7 +114,6 @@ def index(lang):
                 restored_rgb = cv2.cvtColor(output, cv2.COLOR_BGR2RGB)
 
             else:
-                # Usar GFPGAN con fondo opcional
                 bg_upsampler = None
                 if usar_fondo:
                     model = RRDBNet(

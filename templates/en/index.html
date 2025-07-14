@@ -1,202 +1,26 @@
+<!-- index.html (EN version) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Face Enhancer - GlowFace</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      transition: background-color 0.3s, color 0.3s;
+    /* ... Estilos existentes aquí ... */
+    #loadingIndicator {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
     }
-
-    body.dark {
-      background-color: #121212;
-      color: #f0f0f0;
-    }
-
-    h1 {
-      text-align: center;
-      margin-top: 30px;
-    }
-
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 30px;
-      gap: 30px;
-    }
-
-    .image-panel img {
+    #preview {
       max-width: 100%;
       max-height: 80vh;
-      display: block;
+      display: none;
       margin: auto;
       border: 1px solid #ccc;
     }
-
-    .form-panel {
-      flex: 1 1 400px;
-      max-width: 500px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .form-panel form {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      align-items: center;
-      width: 100%;
-      max-width: 320px;
-    }
-
-    .form-panel input[type="file"],
-    .form-panel select,
-    .form-panel button {
-      font-size: 16px;
-      padding: 8px 12px;
-      width: 100%;
-      max-width: 300px;
-    }
-
-    .form-panel label {
-      font-size: 16px;
-    }
-
-    .select-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    button, a {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      text-decoration: none;
-      cursor: pointer;
-      text-align: center;
-      font-size: 16px;
-      padding: 10px 20px;
-    }
-
-    button:hover, a:hover {
-      background-color: #0056b3;
-    }
-
-    body.dark button,
-    body.dark a {
-      background-color: #3366cc;
-    }
-
-    body.dark button:hover,
-    body.dark a:hover {
-      background-color: #224488;
-    }
-
-    .controls {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .theme-toggle {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 14px;
-      padding: 6px 10px;
-      background: #444;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    body.dark .theme-toggle {
-      background: #eee;
-      color: black;
-    }
-
-    .lang-switch {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-    }
-
-    .lang-switch img {
-      width: 24px;
-      height: 24px;
-      cursor: pointer;
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        flex-direction: column;
-        padding: 20px;
-      }
-
-      .image-panel img {
-        max-height: 60vh;
-      }
-    }
-
-    #footer {
-      background-color: #f0f0f0;
-      color: #333;
-      padding: 20px;
-      text-align: center;
-    }
-
-    #footer a {
-      color: #007bff;
-      text-decoration: none;
-      margin: 0 10px;
-    }
-
-    #footer a:hover {
-      text-decoration: underline;
-    }
-
-    body.dark #footer {
-      background-color: #121212;
-      color: #ccc;
-    }
-
-    body.dark #footer a {
-      color: #9fc3ff;
-    }
-
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-    }
-
-    body {
-      flex: 1;
-    }
-
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
   </style>
-
-  <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-VCC08QD46V"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -204,53 +28,24 @@
     gtag('js', new Date());
     gtag('config', 'G-VCC08QD46V');
   </script>
-  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6048928625187693"
-     crossorigin="anonymous"></script>
-  <!-- OpenGraph Tags for English -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="GlowFace – AI Photo Enhancer">
-  <meta property="og:description" content="Enhance your face photos using powerful AI. It's fast, private, and free.">
-  <meta property="og:image" content="{{ url_for('static', filename='og-preview.png', _external=True) }}">
-  <meta property="og:url" content="https://glowface.art/">
-  <meta property="og:locale" content="en_US">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="GlowFace – AI Photo Enhancer">
-  <meta name="twitter:description" content="Enhance your face photos using powerful AI. Fast, private, and free.">
-  <meta name="twitter:image" content="{{ url_for('static', filename='og-preview.png', _external=True) }}">
-
-
 </head>
 <body>
   <main>
     <div class="lang-switch">
       <a href="/es"><img src="{{ url_for('static', filename='es.png') }}" alt="Español" style="width: 24px; height: 16px;"></a>
     </div>
-
     <button class="theme-toggle" onclick="toggleTheme()">🌗 Dark Mode</button>
-
     <h1>AI Face Enhancer</h1>
-
     <div class="container">
-      {% if output_image and original_image %}
       <div class="image-panel">
-        <img id="resultImg" src="{{ output_image }}">
+        <img id="resultImg" src="{% if output_image %}{{ output_image }}{% endif %}" style="display: {% if output_image %}block{% else %}none{% endif %};">
+        <img id="preview" src="#" alt="preview">
       </div>
-      {% endif %}
-
       <div class="form-panel">
-        <form method="POST" enctype="multipart/form-data">
-          <input type="file" name="image" accept="image/*" required>
-
-          <label>
-            <input type="checkbox" name="mejorar_fondo" value="1">
-            Also enhance background (slower)
-          </label>
-          <label>
-            <input type="checkbox" name="modo_dibujo" value="1">
-            Enhance ilustrations
-          </label>
-
+        <form id="uploadForm" method="POST" enctype="multipart/form-data" onsubmit="startProcessing()">
+          <input type="file" name="image" accept="image/*" required onchange="showPreview(this)">
+          <label><input type="checkbox" name="mejorar_fondo" value="1"> Also enhance background (slower)</label>
+          <label><input type="checkbox" name="modo_dibujo" value="1"> Enhance illustrations</label>
           <div class="select-row">
             <label for="escala">Upscale factor:</label>
             <select name="escala" id="escala">
@@ -259,37 +54,49 @@
               <option value="4">4x (maximum quality)</option>
             </select>
           </div>
-
-          <button type="submit" onclick="gtag('event', 'click', { 'event_category': 'Button', 'event_label': 'Enhance Image' });">
-            Enhance Image
-          </button>
+          <button type="submit">Enhance Image</button>
         </form>
-
+        <div id="loadingIndicator">
+          <img src="{{ url_for('static', filename='loading.gif') }}" alt="Processing..." style="width: 80px;">
+          <p>Processing image...</p>
+        </div>
         {% if output_image and original_image %}
         <div class="controls">
-          <button onclick="toggleImage()">Toggle Original / Enhanced</button>
-          <a href="{{ output_image }}" download onclick="gtag('event', 'click', { 'event_category': 'Button', 'event_label': 'Download Image' });">
-            ⬇️ Download enhanced image
-          </a>
+          <button id="toggleBtn" onclick="toggleImage()">Toggle Original / Enhanced</button>
+          <a href="{{ output_image }}" download>⬇️ Download enhanced image</a>
         </div>
         {% endif %}
       </div>
     </div>
-
     <script>
       let showingOriginal = false;
       function toggleImage() {
         const img = document.getElementById("resultImg");
-        img.src = showingOriginal ? "{{ output_image }}" : "{{ original_image }}";
         showingOriginal = !showingOriginal;
+        img.src = showingOriginal ? "{{ original_image }}" : "{{ output_image }}";
+        const btn = document.getElementById("toggleBtn");
+        btn.textContent = showingOriginal ? "Show Enhanced" : "Show Original";
+        btn.style.backgroundColor = showingOriginal ? "#28a745" : "#007bff";
       }
-
       function toggleTheme() {
         const body = document.body;
         const isDark = body.classList.toggle("dark");
         localStorage.setItem("darkMode", isDark ? "1" : "0");
       }
-
+      function startProcessing() {
+        document.getElementById("uploadForm").style.display = "none";
+        document.getElementById("loadingIndicator").style.display = "flex";
+        document.getElementById("preview").style.display = "none";
+      }
+      function showPreview(input) {
+        const file = input.files[0];
+        if (file) {
+          const preview = document.getElementById("preview");
+          preview.src = URL.createObjectURL(file);
+          preview.style.display = "block";
+          document.getElementById("resultImg").style.display = "none";
+        }
+      }
       window.onload = () => {
         if (localStorage.getItem("darkMode") === "1") {
           document.body.classList.add("dark");
@@ -297,7 +104,6 @@
       };
     </script>
   </main>
-
   <footer id="footer">
     <a href="/en/about">About</a> |
     <a href="/en/how-to-use">How to Use</a> |

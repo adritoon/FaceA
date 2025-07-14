@@ -2,7 +2,7 @@ import os
 import cv2
 import time
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, send_from_directory
+from flask import Flask, render_template, request, redirect, send_from_directory, url_for
 from PIL import Image
 from werkzeug.utils import secure_filename
 from basicsr.archs.rrdbnet_arch import RRDBNet
@@ -70,8 +70,8 @@ def index(lang):
             output_path = os.path.join(app.config["OUTPUT_FOLDER"], enhanced_filename)
             original_copy_path = os.path.join(app.config["OUTPUT_FOLDER"], original_filename)
 
-            output_image = f"outputs/{enhanced_filename}"
-            original_image = f"outputs/{original_filename}"
+            output_image = url_for("static", filename=f"outputs/{enhanced_filename}")
+            original_image = url_for("static", filename=f"outputs/{original_filename}")
 
             img = Image.open(file).convert("RGB")
             img.save(input_path)

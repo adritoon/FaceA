@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Mejorador de Rostros - GlowFace</title>
+  <title>Mejorador Facial - GlowFace</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -204,6 +204,7 @@
       flex-direction: column;
     }
   </style>
+
   <script>
     let showingOriginal = false;
     function toggleImage(btn) {
@@ -211,7 +212,7 @@
       showingOriginal = !showingOriginal;
       img.src = showingOriginal ? "{{ original_image }}" : "{{ output_image }}";
       btn.classList.toggle("active", !showingOriginal);
-      btn.textContent = showingOriginal ? "Ver mejorada" : "Ver original";
+      btn.textContent = showingOriginal ? "Mostrar mejorada" : "Mostrar original";
     }
 
     function toggleTheme() {
@@ -233,6 +234,25 @@
         });
       }
     };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const input = document.getElementById("imageInput");
+      const resultImg = document.getElementById("resultImg");
+
+      if (input && resultImg) {
+        input.addEventListener("change", (event) => {
+          const file = event.target.files[0];
+          if (file && file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              resultImg.src = e.target.result;
+              resultImg.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+    });
   </script>
 </head>
 <body>
@@ -241,26 +261,28 @@
       <a href="/en"><img src="{{ url_for('static', filename='en.png') }}" alt="English"></a>
     </div>
 
-    <button class="theme-toggle" onclick="toggleTheme()">🌗 Modo oscuro</button>
+    <button class="theme-toggle" onclick="toggleTheme()">🌗 Modo Oscuro</button>
 
     <h1>Mejorador Facial con IA</h1>
 
     <div class="container">
-      {% if output_image and original_image %}
       <div class="image-panel">
-        <img id="resultImg" src="{{ output_image }}">
+        {% if output_image and original_image %}
+          <img id="resultImg" src="{{ output_image }}">
+        {% else %}
+          <img id="resultImg" style="display: none;">
+        {% endif %}
       </div>
-      {% endif %}
 
       <div class="form-panel">
         <form method="POST" enctype="multipart/form-data">
-          <input type="file" name="image" accept="image/*" required>
-          <label><input type="checkbox" name="mejorar_fondo" value="1"> Mejorar también el fondo (más lento)</label>
+          <input type="file" id="imageInput" name="image" accept="image/*" required>
+          <label><input type="checkbox" name="mejorar_fondo" value="1"> También mejorar fondo (más lento)</label>
           <label><input type="checkbox" name="modo_dibujo" value="1"> Mejorar ilustraciones</label>
           <div class="select-row">
-            <label for="escala">Escala de mejora:</label>
+            <label for="escala">Factor de ampliación:</label>
             <select name="escala" id="escala">
-              <option value="1">1x (sin ampliar)</option>
+              <option value="1">1x (sin ampliación)</option>
               <option value="2" selected>2x (recomendado)</option>
               <option value="4">4x (máxima calidad)</option>
             </select>
@@ -270,7 +292,7 @@
         <img id="loading-gif" src="{{ url_for('static', filename='loading.gif') }}" class="loading">
         {% if output_image and original_image %}
         <div class="controls">
-          <button class="toggle-btn active" onclick="toggleImage(this)">Ver original</button>
+          <button class="toggle-btn active" onclick="toggleImage(this)">Mostrar original</button>
           <a href="{{ output_image }}" download>⬇️ Descargar imagen mejorada</a>
         </div>
         {% endif %}

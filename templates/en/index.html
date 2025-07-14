@@ -234,6 +234,25 @@
         });
       }
     };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const input = document.getElementById("imageInput");
+      const resultImg = document.getElementById("resultImg");
+
+      if (input && resultImg) {
+        input.addEventListener("change", (event) => {
+          const file = event.target.files[0];
+          if (file && file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              resultImg.src = e.target.result;
+              resultImg.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+    });
   </script>
 </head>
 <body>
@@ -247,15 +266,17 @@
     <h1>AI Face Enhancer</h1>
 
     <div class="container">
-      {% if output_image and original_image %}
       <div class="image-panel">
-        <img id="resultImg" src="{{ output_image }}">
+        {% if output_image and original_image %}
+          <img id="resultImg" src="{{ output_image }}">
+        {% else %}
+          <img id="resultImg" style="display: none;">
+        {% endif %}
       </div>
-      {% endif %}
 
       <div class="form-panel">
         <form method="POST" enctype="multipart/form-data">
-          <input type="file" name="image" accept="image/*" required>
+          <input type="file" id="imageInput" name="image" accept="image/*" required>
           <label><input type="checkbox" name="mejorar_fondo" value="1"> Also enhance background (slower)</label>
           <label><input type="checkbox" name="modo_dibujo" value="1"> Enhance ilustrations</label>
           <div class="select-row">
